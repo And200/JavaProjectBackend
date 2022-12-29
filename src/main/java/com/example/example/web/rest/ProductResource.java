@@ -7,21 +7,29 @@ import com.example.example.repository.ProductCategoryRepository;
 import com.example.example.repository.ProductRepository;
 import com.example.example.service.dto.CreateProductDto;
 import com.example.example.service.dto.ProductDto;
+import com.example.example.service.image.storage.FilesController;
+import com.example.example.service.image.storage.StorageService;
 import com.example.example.service.mapper.ProductToDtoConverter;
-import com.example.example.web.rest.errors.ConstanstError;
+import com.example.example.web.rest.errors.ApiError;
 import com.example.example.web.rest.errors.ProductNotFoundException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,14 +46,36 @@ public class ProductResource {
 
     private final ProductCategoryRepository productCategoryRepository;
 
-    public ProductResource(ProductCategoryRepository productCategoryRepository, ProductRepository productRepository, ProductToDtoConverter productToDtoConverter) {
+    private final StorageService storageService;
+
+    public ProductResource(StorageService storageService,ProductCategoryRepository productCategoryRepository, ProductRepository productRepository, ProductToDtoConverter productToDtoConverter) {
         this.productCategoryRepository=productCategoryRepository;
         this.productRepository = productRepository;
         this.productToDtoConverter=productToDtoConverter;
+        this.storageService=storageService;
     }
 
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
+
+
+
+    @Operation(summary = "Obtain All products From Product Resource",description = "provider all products")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = " OK",content = @Content(schema = @Schema(
+                    implementation = Product.class
+            ))),
+            @ApiResponse(responseCode = "404",description = " Not Found",content = @Content(schema = @Schema(
+                  implementation =  ApiError.class
+            ))),
+            @ApiResponse(responseCode = "500",description = " Internal Server Error",content = @Content(schema = @Schema(
+                    implementation = ApiError.class
+            ))),
+    })
+
+
+
+
     @GetMapping("/products")
     public ResponseEntity<List<ProductDto>>getAllProducts(){
         List<Product>result=null;
@@ -55,7 +85,7 @@ public class ProductResource {
         List<ProductDto>query= result.stream().map(productToDtoConverter::convertToDto).collect(Collectors.toList());
         return  ResponseEntity.ok().body(query);
     }
-
+/*
     @PostMapping("/products")
     public ResponseEntity<Product>createProduct(@Valid @RequestBody CreateProductDto productDto)throws URISyntaxException {
 
@@ -79,6 +109,33 @@ public class ProductResource {
 
 
     }
+
+
+ */
+
+    @PostMapping(value="/products",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Product>createProduct(@RequestPart("nuevo") CreateProductDto productDto, @RequestPart("file")MultipartFile file)throws URISyntaxException {
+    String urlImage=null;
+    if(!file.isEmpty()){
+        String imagen= storageService.store(file);
+        urlImage= MvcUriComponentsBuilder.fromMethodName(FilesController.class,"serveFile",imagen,null).
+        build().toUriString();
+    }
+
+
+        Product newProduct=new Product();
+        newProduct.setName(productDto.getName());
+        newProduct.setDescription(productDto.getName());
+        newProduct.setPrice(productDto.getPrice());
+        newProduct.setImage(urlImage);
+        ProductCategory productCategory=productCategoryRepository.findById(productDto.getCategoryId()).orElse(null);
+        newProduct.setProductCategory(productCategory);
+        Product result = productRepository.save(newProduct);
+        this.productRepository.save(result);
+        return ResponseEntity.created(new URI("/api/products/" + result.getId())).body(result);
+
+    }
+
 
     @PutMapping("/products/{id}")
     public ResponseEntity<Product>updateProduct(@Valid @RequestBody Product product){

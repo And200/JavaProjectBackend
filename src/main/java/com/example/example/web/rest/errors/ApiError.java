@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 @Getter @Setter @RequiredArgsConstructor @NoArgsConstructor
-public class ConstanstError {
+public class ApiError {
 
 
     @NonNull

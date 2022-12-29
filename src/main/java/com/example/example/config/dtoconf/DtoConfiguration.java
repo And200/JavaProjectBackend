@@ -1,4 +1,4 @@
-package com.example.example.config;
+package com.example.example.config.dtoconf;
 
 
 import org.modelmapper.ModelMapper;

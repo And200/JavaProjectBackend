@@ -1,14 +1,21 @@
 package com.example.example;
 import com.example.example.repository.ProductRepository;
 import com.example.example.service.ProductCategoryService;
+import com.example.example.service.image.storage.StorageService;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 
+
+
 @SpringBootApplication
+@RestController
 public class ExampleApplication {
 
 
@@ -35,13 +42,18 @@ public class ExampleApplication {
 
         SpringApplication.run(ExampleApplication.class, args);
     }
-
-
-
     @RequestMapping(value = "/app")
-    public String hello(){
+    public String hello() {
+        return "app running";
+    }
 
-        return "application server running ";
+
+    @Bean
+    public CommandLineRunner init(StorageService storageService){
+        return args ->{
+            storageService.deleteAll();
+            storageService.init();
+        };
     }
 
 

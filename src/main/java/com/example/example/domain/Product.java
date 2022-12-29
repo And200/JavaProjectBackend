@@ -1,5 +1,5 @@
 package com.example.example.domain;
-
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -13,17 +13,38 @@ import java.util.Objects;
 })
 public class Product implements Serializable {
     private static final long serialVersionUID = 1L;
+
+
+
+    @Schema(defaultValue ="ID of the product",example = "1",minProperties = 1)
+
+
     @Id
     @GeneratedValue(strategy =GenerationType.IDENTITY )
     private Integer id;
+
+
+    @Schema(defaultValue ="Name OF the product",example = "Pan Rollo",minProperties = 2)
+
+
     @NotNull
     @Size(max=50)
     @Column(name = "name",nullable = false)
     private String name;
 
+
+
+    @Schema(defaultValue ="price",example = "333",minProperties = 2)
+
+
     @NotNull
     @Column(name = "price",length = 50,nullable = false)
     private Integer price;
+
+
+    @Schema(defaultValue ="description",example = "Pan Rollo Con queso",minProperties = 2)
+
+
     @NotNull
     @Column(name = "description",length = 50,nullable = false)
     private String description;
@@ -31,6 +52,9 @@ public class Product implements Serializable {
     @Column(name = "image",length = 50,nullable = false)
     private String image;
 
+
+
+    @Schema(defaultValue ="Product Category",example = "1",minProperties = 2)
 
     @ManyToOne(optional = false)
     @JoinColumn(name="id_category",referencedColumnName = "id",

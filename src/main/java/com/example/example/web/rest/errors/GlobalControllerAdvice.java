@@ -1,7 +1,6 @@
 package com.example.example.web.rest.errors;
 
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +25,13 @@ public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
         return super.handleExceptionInternal(ex, body, headers, status, request);
 
          */
-        ConstanstError constanstError=new ConstanstError(status,ex.getMessage());
+        ApiError constanstError=new ApiError(status,ex.getMessage());
         return ResponseEntity.status(status).headers(headers).body(constanstError);
 
     }
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ConstanstError> handleProductNotFound(ProductNotFoundException exception){
+    public ResponseEntity<ApiError> handleProductNotFound(ProductNotFoundException exception){
         /*
         ConstanstError constanstError=new ConstanstError();
         constanstError.setStatus(HttpStatus.NOT_FOUND);
@@ -43,7 +42,7 @@ public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
 
 
          */
-        ConstanstError constanstError=new ConstanstError(HttpStatus.NOT_FOUND, exception.getMessage());
+        ApiError constanstError=new ApiError(HttpStatus.NOT_FOUND, exception.getMessage());
         return ResponseEntity.status(constanstError.getStatus()).body(constanstError);
     }
 
