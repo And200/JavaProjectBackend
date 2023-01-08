@@ -72,10 +72,6 @@ public class ProductResource {
                     implementation = ApiError.class
             ))),
     })
-
-
-
-
     @GetMapping("/products")
     public ResponseEntity<List<ProductDto>>getAllProducts(){
         List<Product>result=null;

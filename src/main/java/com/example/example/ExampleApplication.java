@@ -1,6 +1,6 @@
 package com.example.example;
 import com.example.example.repository.ProductRepository;
-import com.example.example.service.ProductCategoryService;
+import com.example.example.service.mapper.ProductCategoryService;
 import com.example.example.service.image.storage.StorageService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

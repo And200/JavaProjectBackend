@@ -24,7 +24,7 @@ public class Product implements Serializable {
     private Integer id;
 
 
-    @Schema(defaultValue ="Name OF the product",example = "Pan Rollo",minProperties = 2)
+    @Schema(defaultValue ="Name Of the product",example = "Pan Rollo",minProperties = 2)
 
 
     @NotNull

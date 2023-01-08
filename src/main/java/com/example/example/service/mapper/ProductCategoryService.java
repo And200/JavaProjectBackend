@@ -1,4 +1,4 @@
-package com.example.example.service;
+package com.example.example.service.mapper;
 
 import com.example.example.repository.ProductCategoryRepository;
 import org.springframework.stereotype.Service;
