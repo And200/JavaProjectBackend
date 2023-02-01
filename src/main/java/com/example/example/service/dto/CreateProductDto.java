@@ -1,7 +1,4 @@
 package com.example.example.service.dto;
-
-
-import com.example.example.domain.ProductCategory;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -7,8 +7,6 @@ import com.example.example.repository.ProductCategoryRepository;
 import com.example.example.repository.ProductRepository;
 import com.example.example.service.dto.CreateProductDto;
 import com.example.example.service.dto.ProductDto;
-import com.example.example.service.image.storage.FilesController;
-import com.example.example.service.image.storage.StorageService;
 import com.example.example.service.mapper.ProductToDtoConverter;
 import com.example.example.web.rest.errors.ApiError;
 import com.example.example.web.rest.errors.ProductNotFoundException;
@@ -46,13 +44,12 @@ public class ProductResource {
 
     private final ProductCategoryRepository productCategoryRepository;
 
-    private final StorageService storageService;
 
-    public ProductResource(StorageService storageService,ProductCategoryRepository productCategoryRepository, ProductRepository productRepository, ProductToDtoConverter productToDtoConverter) {
+
+    public ProductResource(ProductCategoryRepository productCategoryRepository, ProductRepository productRepository, ProductToDtoConverter productToDtoConverter) {
         this.productCategoryRepository=productCategoryRepository;
         this.productRepository = productRepository;
         this.productToDtoConverter=productToDtoConverter;
-        this.storageService=storageService;
     }
 
 
@@ -109,21 +106,15 @@ public class ProductResource {
 
  */
 
-    @PostMapping(value="/products",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Product>createProduct(@RequestPart("nuevo") CreateProductDto productDto, @RequestPart("file")MultipartFile file)throws URISyntaxException {
-    String urlImage=null;
-    if(!file.isEmpty()){
-        String imagen= storageService.store(file);
-        urlImage= MvcUriComponentsBuilder.fromMethodName(FilesController.class,"serveFile",imagen,null).
-        build().toUriString();
-    }
+    @PostMapping(value="/products")
+    public ResponseEntity<Product>createProduct(@Valid @RequestBody CreateProductDto productDto)throws URISyntaxException {
 
 
         Product newProduct=new Product();
         newProduct.setName(productDto.getName());
         newProduct.setDescription(productDto.getName());
         newProduct.setPrice(productDto.getPrice());
-        newProduct.setImage(urlImage);
+        newProduct.setImage(productDto.getImage());
         ProductCategory productCategory=productCategoryRepository.findById(productDto.getCategoryId()).orElse(null);
         newProduct.setProductCategory(productCategory);
         Product result = productRepository.save(newProduct);
@@ -134,23 +125,27 @@ public class ProductResource {
 
 
     @PutMapping("/products/{id}")
-    public ResponseEntity<Product>updateProduct(@Valid @RequestBody Product product){
-        if(product.getId() ==null){
+    public ResponseEntity<Product>updateProduct(@Valid @RequestBody CreateProductDto productDto){
+        if(productDto.getId() ==null){
             return ResponseEntity.badRequest().build();
         }
 
-        Optional <Product>query= productRepository.findById(product.getId());
+        Optional <Product>query= productRepository.findById(productDto.getId());
         Product result=null;
         if(query.isPresent()){
-            result=productRepository.save(product);
+           query.get().setName(productDto.getName());
+           query.get().setDescription(productDto.getDescription());
+            ProductCategory productCategory=productCategoryRepository.findById(productDto.getCategoryId()).orElse(null);
+           query.get().setProductCategory(productCategory);
+           query.get().setImage(productDto.getImage());
+           query.get().setPrice(productDto.getPrice());
+          result= this.productRepository.save(query.get());
+
         }else{
             return  ResponseEntity.badRequest().build();
         }
         return  ResponseEntity.ok().body(result);
     }
-
-
-
 
 
     @GetMapping("/products/{id}")
